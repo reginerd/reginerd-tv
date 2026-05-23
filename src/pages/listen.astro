@@ -1,5 +1,6 @@
 ---
 import RadioPlayer from '../components/RadioPlayer';
+import RecentlyPlayed from '../components/RecentlyPlayed';
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -16,7 +17,7 @@ import { SITE_TITLE } from '../consts';
 		<main>
 			<section style="max-width: 700px; margin: 0 auto; padding: 3rem 1rem;">
 				<h1 style="margin: 0 0 0.5rem;">reginerd.fm</h1>
-				<p style="margin: 0 0 2rem; color: var(--muted, #666);">
+				<p style="margin: 0 0 2rem; color: var(--muted);">
 					24/7 radio from my Plex library. Blocks change by time of day. AI DJ breaks reference
 					what I've been writing about. No algorithm, no ads.
 				</p>
@@ -25,7 +26,7 @@ import { SITE_TITLE } from '../consts';
 					<RadioPlayer mode="full" client:load />
 				</div>
 
-				<p style="font-size: 0.85rem; color: var(--muted, #666);">
+				<p style="font-size: 0.85rem; color: var(--muted);">
 					Full player with album art, lyrics, and AirPlay support →
 					<a href="https://radio.reginerd.tv" target="_blank" rel="noopener noreferrer">
 						radio.reginerd.tv
@@ -34,8 +35,17 @@ import { SITE_TITLE } from '../consts';
 
 				<hr style="margin: 2.5rem 0;" />
 
-				<h2 style="margin: 0 0 0.75rem;">How it works</h2>
-				<ul style="color: var(--muted, #666); line-height: 1.7; padding-left: 1.25rem;">
+				<div style="margin-bottom: 0.75rem; display: flex; align-items: baseline; justify-content: space-between;">
+					<span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);">Recently Played</span>
+				</div>
+				<div style="margin-bottom: 2.5rem;">
+					<RecentlyPlayed client:load />
+				</div>
+
+				<hr style="margin: 2.5rem 0;" />
+
+				<h2 style="margin: 0 0 0.75rem; font-size: 1.25rem;">How it works</h2>
+				<ul style="color: var(--muted); line-height: 1.7; padding-left: 1.25rem;">
 					<li>Music comes from my personal Plex library — indexed by BPM, energy, and vibe</li>
 					<li>Blocks shift through the day: Morning, Midday, Prime Time, Wind Down, Late Night</li>
 					<li>Nightly, an AI orchestrator builds tomorrow's playlists and DJ scripts</li>

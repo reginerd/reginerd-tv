@@ -1,5 +1,6 @@
 ---
 import RadioPlayer from '../components/RadioPlayer';
+import RecentlyPlayed from '../components/RecentlyPlayed';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
@@ -41,6 +42,16 @@ const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
 					<RadioPlayer mode="compact" client:load />
 					<a href="/listen" class="hero__listen-link">Full player →</a>
 				</div>
+			</section>
+
+			<hr class="section-divider" />
+
+			<section class="recent-section">
+				<div class="section-header">
+					<span class="section-label">Recently Played</span>
+					<a href="/listen" class="section-link">Full player →</a>
+				</div>
+				<RecentlyPlayed client:load />
 			</section>
 
 			<hr class="section-divider" />
@@ -133,6 +144,34 @@ const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
 	/* Divider */
 	.section-divider {
 		margin: 2.5rem 0;
+	}
+
+	/* Shared section header */
+	.section-header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+	}
+
+	.section-label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--muted);
+	}
+
+	.section-link {
+		font-size: 0.75rem;
+		color: var(--muted);
+		text-decoration: none;
+		letter-spacing: 0.03em;
+	}
+
+	.section-link:hover {
+		color: var(--accent);
+		text-decoration: none;
 	}
 
 	/* Writing section */
