@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # last.fm API key
 .env
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
