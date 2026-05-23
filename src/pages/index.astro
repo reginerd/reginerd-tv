@@ -1,27 +1,21 @@
 ---
+import RadioPlayer from '../components/RadioPlayer';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import LastfmRecent from '../components/LastfmRecent.astro';
-import LastfmTopArtistsWeekly from '../components/LastfmTopArtistsWeekly.astro';
-import RadioPlayer from '../components/RadioPlayer';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { getCollection } from 'astro:content';
 
 const allPosts = await getCollection('blog');
+
 const toTime = (d: unknown) => {
   if (d instanceof Date) return d.getTime();
   if (typeof d === 'string') return new Date(d).getTime();
   return 0;
 };
 
-const isDraft = (data: unknown) => {
-  const d = (data as { draft?: boolean } | null | undefined)?.draft;
-  return d === true;
-};
-
 const latestPosts = allPosts
-  .filter((p) => !isDraft(p.data))
+  .filter((p) => !p.data.draft)
   .sort((a, b) => toTime(b.data.pubDate) - toTime(a.data.pubDate))
   .slice(0, 6);
 
@@ -36,149 +30,206 @@ const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
 	<body>
 		<Header />
 		<main>
-			<section style="max-width: 1100px; margin: 0 auto; padding: 2.5rem 1rem 0;">
-				<div
-					style="display: grid; gap: 2rem; align-items: start;"
-					class="home-grid"
-				>
-					<div>
-						<h1 style="margin: 0 0 0.75rem;">reginerd.fm</h1>
-						<p style="margin: 0 0 1.5rem; color: var(--muted, #666);">
-							Long-form thoughts on music, tech, and whatever I’m building.
-						</p>
-
-						<div class="card" style="margin: 0 0 1.5rem;">
-							<p style="margin: 0;">
-								Welcome — this is where I put the longer version of my thoughts. The scrapbook / zine energy lives on social.
-							</p>
-						</div>
-
-						<hr style="margin: 2rem 0;" />
-
-						<h2 style="margin: 0 0 0.75rem;">Latest writing</h2>
-						<p style="margin: 0 0 1rem; color: var(--muted, #666);">
-							Read the full archive on <a href="/blog/">/blog</a>.
-						</p>
-
-						{latestPosts.length === 0 ? (
-							<p style="margin: 0; color: var(--muted, #666);">
-								No posts yet — check back soon.
-							</p>
-						) : (
-							<div class="latest-grid">
-								{latestPosts.map((post) => (
-									<a class="latest-card" href={`/blog/${toSlug(post.id)}/`}>
-										<div class="latest-card__title">{post.data.title}</div>
-										{post.data.pubDate ? (
-											<div class="latest-card__date">
-												{(post.data.pubDate instanceof Date ? post.data.pubDate : new Date(post.data.pubDate)).toLocaleDateString('en-US', {
-													year: 'numeric',
-													month: 'short',
-													day: 'numeric',
-												})}
-											</div>
-										) : null}
-									</a>
-								))}
-							</div>
-						)}
-					</div>
-
-					<aside
-						style="border-left: 1px solid rgba(0,0,0,.10); padding-left: 1.5rem;"
-						class="sidebar"
-					>
-						<div style="margin-bottom: 1.5rem;">
-							<h3 style="font-size: 0.9rem; margin: 0 0 0.5rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.6;">Live Radio</h3>
-							<RadioPlayer mode="compact" client:load />
-							<a href="/listen" style="font-size: 0.75rem; display: block; margin-top: 0.4rem; opacity: 0.6;">Full player →</a>
-						</div>
-						<LastfmRecent />
-						<LastfmTopArtistsWeekly />
-					</aside>
+			<section class="hero">
+				<div class="hero__text">
+					<h1 class="hero__title">reginerd.tv</h1>
+					<p class="hero__sub">
+						Music writing, code, and a 24/7 AI radio station out of the Bay Area.
+					</p>
+				</div>
+				<div class="hero__player">
+					<RadioPlayer mode="compact" client:load />
+					<a href="/listen" class="hero__listen-link">Full player →</a>
 				</div>
 			</section>
 
-			<style>
-				/* Make Last.fm sidebar widgets slightly more compact */
-				.sidebar {
-				  font-size: 0.9rem;
-				}
+			<hr class="section-divider" />
 
-				.sidebar h3 {
-				  font-size: 0.95rem;
-				}
+			<section class="writing-section">
+				<div class="writing-section__header">
+					<h2 class="writing-section__title">Latest writing</h2>
+					<a href="/blog/" class="writing-section__all">All posts →</a>
+				</div>
 
-				.sidebar li,
-				.sidebar p,
-				.sidebar span {
-				  line-height: 1.4;
-				}
-
-				.home-grid {
-					grid-template-columns: 1fr;
-				}
-
-				.latest-grid {
-					display: grid;
-					grid-template-columns: 1fr;
-					gap: 1rem;
-				}
-
-				.latest-card {
-					display: block;
-					text-decoration: none;
-					border: 1px solid rgba(0,0,0,.10);
-					border-radius: 12px;
-					padding: 1rem;
-					transition: transform 120ms ease, border-color 120ms ease;
-				}
-
-				.latest-card:hover {
-					transform: translateY(-1px);
-					border-color: rgba(0,0,0,.22);
-				}
-
-				.latest-card__title {
-					font-family: ui-sans-serif, system-ui;
-					font-weight: 800;
-					line-height: 1.2;
-					margin: 0 0 .35rem;
-				}
-
-				.latest-card__date {
-					margin-top: .25rem;
-					font-size: .7rem;
-					letter-spacing: .04em;
-					text-transform: uppercase;
-					color: var(--muted, #777);
-				}
-
-
-				@media (min-width: 700px) {
-					.latest-grid {
-						grid-template-columns: repeat(2, minmax(0, 1fr));
-					}
-				}
-
-				@media (min-width: 900px) {
-					.home-grid {
-						grid-template-columns: 2fr 1fr;
-						gap: 2.5rem;
-					}
-					.sidebar {
-						position: sticky;
-						top: 1.25rem;
-					}
-				}
-				@media (max-width: 899px) {
-					.sidebar {
-						border-left: none !important;
-						padding-left: 0 !important;
-					}
-				}
-			</style>
+				{latestPosts.length === 0 ? (
+					<p style="color: var(--muted);">No posts yet — check back soon.</p>
+				) : (
+					<div class="post-grid">
+						{latestPosts.map((post) => (
+							<a class="post-card" href={`/blog/${toSlug(post.id)}/`}>
+								<div class="post-card__title">{post.data.title}</div>
+								{post.data.artist && (
+									<div class="post-card__artist">
+										{post.data.artist}{post.data.releaseYear ? ` · ${post.data.releaseYear}` : ''}
+									</div>
+								)}
+								{post.data.pubDate && (
+									<div class="post-card__date">
+										{(post.data.pubDate instanceof Date
+											? post.data.pubDate
+											: new Date(post.data.pubDate)
+										).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+									</div>
+								)}
+							</a>
+						))}
+					</div>
+				)}
+			</section>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	main {
+		max-width: 860px;
+		width: calc(100% - 2em);
+		margin: 0 auto;
+		padding: 3em 1em;
+	}
+
+	/* Hero */
+	.hero {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		padding-bottom: 0;
+	}
+
+	.hero__title {
+		font-size: clamp(2.5rem, 6vw, 4rem);
+		margin: 0 0 0.4rem;
+		letter-spacing: -0.02em;
+		color: var(--heading);
+	}
+
+	.hero__sub {
+		margin: 0;
+		color: var(--muted);
+		font-size: 1.05rem;
+		line-height: 1.5;
+	}
+
+	.hero__player {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		align-items: flex-start;
+	}
+
+	.hero__listen-link {
+		font-size: 0.75rem;
+		color: var(--muted);
+		text-decoration: none;
+		letter-spacing: 0.03em;
+	}
+
+	.hero__listen-link:hover {
+		color: var(--accent);
+		text-decoration: none;
+	}
+
+	/* Divider */
+	.section-divider {
+		margin: 2.5rem 0;
+	}
+
+	/* Writing section */
+	.writing-section__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		margin-bottom: 1.25rem;
+	}
+
+	.writing-section__title {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.writing-section__all {
+		font-size: 0.75rem;
+		color: var(--muted);
+		text-decoration: none;
+		letter-spacing: 0.03em;
+	}
+
+	.writing-section__all:hover {
+		color: var(--accent);
+		text-decoration: none;
+	}
+
+	/* Post grid */
+	.post-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0.75rem;
+	}
+
+	.post-card {
+		display: block;
+		text-decoration: none;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: 10px;
+		padding: 1rem 1.25rem;
+		transition: border-color 120ms ease, background 120ms ease;
+	}
+
+	.post-card:hover {
+		border-color: rgba(167, 139, 250, 0.3);
+		background: #1c1c1c;
+		text-decoration: none;
+	}
+
+	.post-card__title {
+		font-family: ui-sans-serif, system-ui, sans-serif;
+		font-weight: 800;
+		font-size: 1rem;
+		line-height: 1.2;
+		color: var(--heading);
+		margin-bottom: 0.25rem;
+	}
+
+	.post-card__artist {
+		font-size: 0.8rem;
+		color: var(--accent);
+		margin-bottom: 0.2rem;
+	}
+
+	.post-card__date {
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--muted);
+	}
+
+	@media (min-width: 600px) {
+		.post-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (min-width: 860px) {
+		.hero {
+			flex-direction: row;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 3rem;
+		}
+
+		.hero__text {
+			flex: 1;
+		}
+
+		.hero__player {
+			flex-shrink: 0;
+			padding-top: 0.5rem;
+		}
+	}
+</style>
