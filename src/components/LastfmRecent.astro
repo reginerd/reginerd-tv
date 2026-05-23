@@ -1,0 +1,91 @@
+---
+const API_KEY = import.meta.env.LASTFM_API_KEY;
+const USER = import.meta.env.LASTFM_USER ?? "deegeekay";
+const LIMIT = 5;
+
+type LastfmTrack = {
+  name?: string;
+  url?: string;
+  artist?: { "#text"?: string };
+  album?: { "#text"?: string };
+  "@attr"?: { nowplaying?: "true" | "false" };
+};
+
+type LastfmRecentTracksResponse = {
+  recenttracks?: {
+    track?: LastfmTrack[];
+  };
+};
+
+/**
+ * NOTE:
+ * Errors here often won't show as red squiggles in VS Code because they are runtime (server/build) errors,
+ * not TypeScript syntax errors. We render a friendly fallback instead of crashing the page.
+ */
+let error: string | null = null;
+let normalized: { artist: string; name: string; url: string; nowPlaying: boolean }[] = [];
+
+try {
+  if (!API_KEY) {
+    throw new Error("Missing LASTFM_API_KEY (check your .env is in the project root and restart npm run dev)");
+  }
+
+  const url =
+    `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks` +
+    `&user=${encodeURIComponent(USER)}` +
+    `&api_key=${encodeURIComponent(API_KEY)}` +
+    `&limit=${LIMIT}` +
+    `&format=json`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Last.fm request failed: ${res.status}`);
+
+  const data = (await res.json()) as LastfmRecentTracksResponse;
+  const tracks: LastfmTrack[] = data?.recenttracks?.track ?? [];
+
+  normalized = tracks.map((t: LastfmTrack) => {
+    const nowPlaying = t?.["@attr"]?.nowplaying === "true";
+    return {
+      artist: t?.artist?.["#text"] ?? "",
+      name: t?.name ?? "",
+      url: t?.url ?? "",
+      nowPlaying,
+    };
+  });
+} catch (e) {
+  error = e instanceof Error ? e.message : String(e);
+}
+---
+
+<section style="margin: 0 0 2rem;">
+  <h3 style="margin: 0 0 0.75rem;">Recent listens</h3>
+
+  {error ? (
+    <p style="margin: 0 0 1rem; color: var(--muted, #666);">
+      Last.fm widget unavailable: {error}
+    </p>
+  ) : null}
+
+  {!error ? (
+    <>
+      <ul style="list-style:none; padding:0; margin:0; display:grid; gap:.5rem;">
+        {normalized.slice(0, LIMIT).map((t) => (
+          <li>
+            <a href={t.url} target="_blank" rel="noopener noreferrer">
+              <strong>{t.name}</strong>
+            </a>
+            <span style="color: var(--muted, #666);">
+              {" "}— {t.artist}{t.nowPlaying ? " (now playing)" : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p style="margin: .75rem 0 0;">
+        <a href={`https://www.last.fm/user/${USER}`} target="_blank" rel="noopener noreferrer">
+          View full profile →
+        </a>
+      </p>
+    </>
+  ) : null}
+</section>

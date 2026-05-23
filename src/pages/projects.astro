@@ -1,0 +1,157 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+
+const projects = [
+	{
+		name: 'reginerd.fm',
+		blurb: '24/7 AI radio station powered by my Plex library. Nightly orchestrator builds playlists and DJ scripts. Live DJ breaks reference my music writing.',
+		url: 'https://radio.reginerd.tv',
+		status: 'live',
+		tags: ['audio', 'AI', 'python'],
+	},
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Projects — ${SITE_TITLE}`} description="Things I'm building." />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section style="max-width: 800px; margin: 0 auto; padding: 3rem 1rem;">
+				<h1 style="margin: 0 0 0.5rem;">Projects</h1>
+				<p style="margin: 0 0 2.5rem; color: var(--muted, #666);">
+					Things I'm building. More coming.
+				</p>
+
+				<div class="project-grid">
+					{projects.map((p) => (
+						<div class="project-card">
+							<div class="project-card__top">
+								<span class="project-card__name">{p.name}</span>
+								<span class={`status-badge status-badge--${p.status}`}>{p.status}</span>
+							</div>
+							<p class="project-card__blurb">{p.blurb}</p>
+							<div class="project-card__footer">
+								<div class="tag-list">
+									{p.tags.map((t) => <span class="tag">{t}</span>)}
+								</div>
+								<a href={p.url} target="_blank" rel="noopener noreferrer" class="project-link">
+									Visit →
+								</a>
+							</div>
+						</div>
+					))}
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.project-grid {
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: 1fr;
+	}
+
+	@media (min-width: 600px) {
+		.project-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	.project-card {
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		border-radius: 12px;
+		padding: 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.project-card__top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.project-card__name {
+		font-weight: 800;
+		font-size: 1.1rem;
+		font-family: ui-sans-serif, system-ui, sans-serif;
+	}
+
+	.project-card__blurb {
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--muted, #555);
+		line-height: 1.6;
+		flex: 1;
+	}
+
+	.project-card__footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+
+	.tag {
+		font-size: 0.7rem;
+		background: rgba(0, 0, 0, 0.06);
+		border-radius: 4px;
+		padding: 2px 6px;
+		text-transform: lowercase;
+		letter-spacing: 0.02em;
+	}
+
+	.status-badge {
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		padding: 2px 8px;
+		border-radius: 20px;
+	}
+
+	.status-badge--live {
+		background: #d1fae5;
+		color: #065f46;
+	}
+
+	.status-badge--wip {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.status-badge--planned {
+		background: #e5e7eb;
+		color: #374151;
+	}
+
+	.project-link {
+		font-size: 0.85rem;
+		font-weight: 600;
+		text-decoration: none;
+		color: var(--accent, #5b5ea6);
+	}
+
+	.project-link:hover {
+		text-decoration: underline;
+	}
+</style>

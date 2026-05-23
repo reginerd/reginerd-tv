@@ -1,0 +1,49 @@
+---
+import RadioPlayer from '../components/RadioPlayer';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Listen — ${SITE_TITLE}`} description="24/7 AI radio from Reggie's music library. Live DJ breaks, curated blocks, no algorithm." />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section style="max-width: 700px; margin: 0 auto; padding: 3rem 1rem;">
+				<h1 style="margin: 0 0 0.5rem;">reginerd.fm</h1>
+				<p style="margin: 0 0 2rem; color: var(--muted, #666);">
+					24/7 radio from my Plex library. Blocks change by time of day. AI DJ breaks reference
+					what I've been writing about. No algorithm, no ads.
+				</p>
+
+				<div style="margin-bottom: 2rem;">
+					<RadioPlayer mode="full" client:load />
+				</div>
+
+				<p style="font-size: 0.85rem; color: var(--muted, #666);">
+					Full player with album art, lyrics, and AirPlay support →
+					<a href="https://radio.reginerd.tv" target="_blank" rel="noopener noreferrer">
+						radio.reginerd.tv
+					</a>
+				</p>
+
+				<hr style="margin: 2.5rem 0;" />
+
+				<h2 style="margin: 0 0 0.75rem;">How it works</h2>
+				<ul style="color: var(--muted, #666); line-height: 1.7; padding-left: 1.25rem;">
+					<li>Music comes from my personal Plex library — indexed by BPM, energy, and vibe</li>
+					<li>Blocks shift through the day: Morning, Midday, Prime Time, Wind Down, Late Night</li>
+					<li>Nightly, an AI orchestrator builds tomorrow's playlists and DJ scripts</li>
+					<li>When I write about an album, the DJ might reference it on air</li>
+					<li>Rendered with ElevenLabs voice, streamed via Icecast</li>
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

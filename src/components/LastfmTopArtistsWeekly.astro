@@ -1,0 +1,83 @@
+---
+const API_KEY = import.meta.env.LASTFM_API_KEY;
+const USER = import.meta.env.LASTFM_USER ?? "deegeekay";
+const LIMIT = 5;
+
+type LastfmTopArtist = {
+  name?: string;
+  playcount?: string;
+  url?: string;
+};
+
+type LastfmTopArtistsResponse = {
+  topartists?: {
+    artist?: LastfmTopArtist[];
+  };
+};
+
+let error: string | null = null;
+let artists: { name: string; playcount: number; url: string }[] = [];
+
+try {
+  if (!API_KEY) {
+    throw new Error(
+      "Missing LASTFM_API_KEY (check .env and restart npm run dev)"
+    );
+  }
+
+  const url =
+    `https://ws.audioscrobbler.com/2.0/?method=user.gettopartists` +
+    `&user=${encodeURIComponent(USER)}` +
+    `&period=7day` +
+    `&limit=${LIMIT}` +
+    `&api_key=${encodeURIComponent(API_KEY)}` +
+    `&format=json`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Last.fm request failed: ${res.status}`);
+
+  const data = (await res.json()) as LastfmTopArtistsResponse;
+  const raw = data?.topartists?.artist ?? [];
+
+  artists = raw.map((a) => ({
+    name: a?.name ?? "",
+    playcount: Number(a?.playcount ?? 0),
+    url: a?.url ?? "",
+  }));
+} catch (e) {
+  error = e instanceof Error ? e.message : String(e);
+}
+---
+
+<section style="margin: 0 0 2rem;">
+  <h3 style="margin: 0 0 0.75rem;">Top artists · last 7 days</h3>
+
+  {error ? (
+    <p style="color: var(--muted, #666);">
+      Last.fm widget unavailable: {error}
+    </p>
+  ) : (
+    <ol style="list-style: decimal; padding-left: 1.25rem; margin: 0;">
+      {artists.map((a) => (
+        <li style="margin: 0.35rem 0;">
+          <a href={a.url} target="_blank" rel="noopener noreferrer">
+            <strong>{a.name}</strong>
+          </a>
+          <span style="color: var(--muted, #666);">
+            {" "}— {a.playcount} plays
+          </span>
+        </li>
+      ))}
+    </ol>
+  )}
+
+  <p style="margin: 0.75rem 0 0;">
+    <a
+      href={`https://www.last.fm/user/${USER}/library/artists`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      View all artists →
+    </a>
+  </p>
+</section>

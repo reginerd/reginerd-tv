@@ -2,7 +2,30 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import LastfmRecent from '../components/LastfmRecent.astro';
+import LastfmTopArtistsWeekly from '../components/LastfmTopArtistsWeekly.astro';
+import RadioPlayer from '../components/RadioPlayer';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const toTime = (d: unknown) => {
+  if (d instanceof Date) return d.getTime();
+  if (typeof d === 'string') return new Date(d).getTime();
+  return 0;
+};
+
+const isDraft = (data: unknown) => {
+  const d = (data as { draft?: boolean } | null | undefined)?.draft;
+  return d === true;
+};
+
+const latestPosts = allPosts
+  .filter((p) => !isDraft(p.data))
+  .sort((a, b) => toTime(b.data.pubDate) - toTime(a.data.pubDate))
+  .slice(0, 6);
+
+const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
 ---
 
 <!doctype html>
@@ -13,36 +36,148 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section style="max-width: 1100px; margin: 0 auto; padding: 2.5rem 1rem 0;">
+				<div
+					style="display: grid; gap: 2rem; align-items: start;"
+					class="home-grid"
+				>
+					<div>
+						<h1 style="margin: 0 0 0.75rem;">reginerd.fm</h1>
+						<p style="margin: 0 0 1.5rem; color: var(--muted, #666);">
+							Long-form thoughts on music, tech, and whatever I’m building.
+						</p>
+
+						<div class="card" style="margin: 0 0 1.5rem;">
+							<p style="margin: 0;">
+								Welcome — this is where I put the longer version of my thoughts. The scrapbook / zine energy lives on social.
+							</p>
+						</div>
+
+						<hr style="margin: 2rem 0;" />
+
+						<h2 style="margin: 0 0 0.75rem;">Latest writing</h2>
+						<p style="margin: 0 0 1rem; color: var(--muted, #666);">
+							Read the full archive on <a href="/blog/">/blog</a>.
+						</p>
+
+						{latestPosts.length === 0 ? (
+							<p style="margin: 0; color: var(--muted, #666);">
+								No posts yet — check back soon.
+							</p>
+						) : (
+							<div class="latest-grid">
+								{latestPosts.map((post) => (
+									<a class="latest-card" href={`/blog/${toSlug(post.id)}/`}>
+										<div class="latest-card__title">{post.data.title}</div>
+										{post.data.pubDate ? (
+											<div class="latest-card__date">
+												{(post.data.pubDate instanceof Date ? post.data.pubDate : new Date(post.data.pubDate)).toLocaleDateString('en-US', {
+													year: 'numeric',
+													month: 'short',
+													day: 'numeric',
+												})}
+											</div>
+										) : null}
+									</a>
+								))}
+							</div>
+						)}
+					</div>
+
+					<aside
+						style="border-left: 1px solid rgba(0,0,0,.10); padding-left: 1.5rem;"
+						class="sidebar"
+					>
+						<div style="margin-bottom: 1.5rem;">
+							<h3 style="font-size: 0.9rem; margin: 0 0 0.5rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.6;">Live Radio</h3>
+							<RadioPlayer mode="compact" client:load />
+							<a href="/listen" style="font-size: 0.75rem; display: block; margin-top: 0.4rem; opacity: 0.6;">Full player →</a>
+						</div>
+						<LastfmRecent />
+						<LastfmTopArtistsWeekly />
+					</aside>
+				</div>
+			</section>
+
+			<style>
+				/* Make Last.fm sidebar widgets slightly more compact */
+				.sidebar {
+				  font-size: 0.9rem;
+				}
+
+				.sidebar h3 {
+				  font-size: 0.95rem;
+				}
+
+				.sidebar li,
+				.sidebar p,
+				.sidebar span {
+				  line-height: 1.4;
+				}
+
+				.home-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.latest-grid {
+					display: grid;
+					grid-template-columns: 1fr;
+					gap: 1rem;
+				}
+
+				.latest-card {
+					display: block;
+					text-decoration: none;
+					border: 1px solid rgba(0,0,0,.10);
+					border-radius: 12px;
+					padding: 1rem;
+					transition: transform 120ms ease, border-color 120ms ease;
+				}
+
+				.latest-card:hover {
+					transform: translateY(-1px);
+					border-color: rgba(0,0,0,.22);
+				}
+
+				.latest-card__title {
+					font-family: ui-sans-serif, system-ui;
+					font-weight: 800;
+					line-height: 1.2;
+					margin: 0 0 .35rem;
+				}
+
+				.latest-card__date {
+					margin-top: .25rem;
+					font-size: .7rem;
+					letter-spacing: .04em;
+					text-transform: uppercase;
+					color: var(--muted, #777);
+				}
+
+
+				@media (min-width: 700px) {
+					.latest-grid {
+						grid-template-columns: repeat(2, minmax(0, 1fr));
+					}
+				}
+
+				@media (min-width: 900px) {
+					.home-grid {
+						grid-template-columns: 2fr 1fr;
+						gap: 2.5rem;
+					}
+					.sidebar {
+						position: sticky;
+						top: 1.25rem;
+					}
+				}
+				@media (max-width: 899px) {
+					.sidebar {
+						border-left: none !important;
+						padding-left: 0 !important;
+					}
+				}
+			</style>
 		</main>
 		<Footer />
 	</body>
